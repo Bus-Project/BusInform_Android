@@ -11,9 +11,4 @@
         app:actionViewClass="android.widget.SearchView"
         android:title="Search"/>
 
-    <item
-        android:id="@+id/action_search_loc"
-        android:title="주변 검색"
-        app:showAsAction="always" />
-
 </menu>
