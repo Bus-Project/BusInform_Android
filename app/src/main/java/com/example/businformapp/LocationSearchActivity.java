@@ -23,7 +23,7 @@ public class LocationSearchActivity extends AppCompatActivity {
     private LocationTracker lt;
     private GetApiData getApiData;
 
-    private ArrayList<String> array_data;
+    private ArrayList<String []> array_data;
     private ListView mListView;
     private NearStationAdapter mNearStationAdapter;
 
@@ -95,7 +95,9 @@ public class LocationSearchActivity extends AppCompatActivity {
                             break;
                         case XmlPullParser.END_TAG:
                             if (parser.getName().equals("busStationAroundList")) {
-                                array_data.add(regionName + " " + stationId + " " + stationName);
+                                array_data.add(new String[] {
+                                   regionName, stationId, stationName
+                                });
                             }
                             break;
                     }
@@ -114,11 +116,11 @@ public class LocationSearchActivity extends AppCompatActivity {
 
 class NearStationAdapter extends BaseAdapter {
     private final Context mContext;
-    private final ArrayList<String> array_data;
+    private final ArrayList<String []> array_data;
 
     private ViewHolder mViewHolder;
 
-    public NearStationAdapter(Context mContext, ArrayList<String> array_data) {
+    public NearStationAdapter(Context mContext, ArrayList<String []> array_data) {
         this.mContext = mContext;
         this.array_data = array_data;
     }
@@ -149,15 +151,19 @@ class NearStationAdapter extends BaseAdapter {
             mViewHolder = (ViewHolder) convertView.getTag();
         }
 
-        mViewHolder.near_station_text.setText(array_data.get(position));
+        String [] data = array_data.get(position);
+        mViewHolder.near_station_title.setText(data[2] + " (" + data[1] + ")");
+        mViewHolder.near_station_text.setText(data[0]);
 
         return convertView;
     }
 
     private class ViewHolder {
+        private TextView near_station_title;
         private TextView near_station_text;
 
         public ViewHolder(View convertView) {
+            near_station_title = (TextView) convertView.findViewById(R.id.near_station_title);
             near_station_text = (TextView) convertView.findViewById(R.id.near_station_text);
         }
     }
