@@ -1,6 +1,8 @@
 package com.example.businformapp;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Xml;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
@@ -17,12 +19,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.*;
+import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        xml_parse();
     }
 
     @Override
@@ -66,59 +62,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                Intent intent1 = new Intent(MainActivity.this, MainActivity2.class);
+                startActivity(intent1);
+                return true;
+            case R.id.action_search_loc:
+                Intent intent2 = new Intent(MainActivity.this, LocationSearchActivity.class);
+                startActivity(intent2);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    private void xml_parse() {
-        String TAG = "Parsing";
-        InputStream inputStream = getResources().openRawResource(R.raw.selectiveclinic_);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-
-        XmlPullParserFactory xmlPullParserFactory = null;
-        XmlPullParser xmlPullParser = null;
-
-        try {
-            xmlPullParserFactory = XmlPullParserFactory.newInstance();
-            xmlPullParser = xmlPullParserFactory.newPullParser();
-            xmlPullParser.setInput(reader);
-
-            int eventType = xmlPullParser.getEventType();
-
-            while (eventType != xmlPullParser.END_DOCUMENT) {
-                switch (eventType) {
-                    case XmlPullParser.START_DOCUMENT:
-                        Log.i(TAG, "xml START");
-                        break;
-                    case XmlPullParser.START_TAG:
-                        Log.i(TAG, "Start TAG : " + xmlPullParser.getName());
-                        break;
-                    case XmlPullParser.END_TAG:
-                        Log.i(TAG, "End TAG : " + xmlPullParser.getName());
-                        break;
-                    case XmlPullParser.TEXT:
-                        Log.i(TAG, "TEXT : " + xmlPullParser.getText());
-                        break;
-                }
-                try {
-                    eventType = xmlPullParser.next();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (XmlPullParserException e){
-            e.printStackTrace();
-        } finally {
-            try{
-                if(reader != null) reader.close();
-                if(inputStreamReader != null)inputStreamReader.close();
-                if(inputStream != null) inputStream.close();
-            } catch (Exception e2){
-                e2.printStackTrace();
-            }
-        }
     }
 }
