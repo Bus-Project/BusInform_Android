@@ -29,6 +29,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".StationInfoActivity"
+            android:label="StationInfoActivity"/>
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
