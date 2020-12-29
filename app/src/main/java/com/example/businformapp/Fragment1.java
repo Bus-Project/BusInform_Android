@@ -1,6 +1,7 @@
 package com.example.businformapp;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -129,6 +131,7 @@ class RouteNameAdapter extends BaseAdapter {
         return position;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -142,8 +145,14 @@ class RouteNameAdapter extends BaseAdapter {
 
         HashMap<String, String> data = array_data.get(position);
         mViewHolder.route_name_title.setText(data.get("routeName")); // 받아올 정보
-        if (data.get("districtCd").equals("2"))
-            mViewHolder.route_name_text.setText("경기도 " + data.get("routeTypeName"));
+        String idCode = data.get("routeTypeCd");
+        String regionCode = data.get("districtCd");
+        // 임시
+//        TypeAndRegionCode typeAndRegionCode = new TypeAndRegionCode(idCode, regionCode);
+//        regionCode = typeAndRegionCode.getRegionName();
+//        idCode = typeAndRegionCode.getRouteType();
+//        mViewHolder.route_name_text.setText(regionCode + " " + idCode);
+        mViewHolder.route_name_text.setText(data.get("routeName"));
 
         return convertView;
     }
