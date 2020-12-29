@@ -3,27 +3,26 @@ package com.example.businformapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class LocationSearchActivity extends AppCompatActivity {
     private LocationTracker lt;
-    private GetApiData getApiData;
 
-    private ArrayList<String []> array_data;
+    private ArrayList<HashMap<String, String>> stationData;
     private ListView mListView;
     private NearStationAdapter mNearStationAdapter;
 
@@ -35,104 +34,71 @@ public class LocationSearchActivity extends AppCompatActivity {
         mListView = (ListView) findViewById(R.id.near_station_list);
 
         lt = new LocationTracker(this);
+        Log.i("Location", "X: " + lt.getLong() + ", Y: " + lt.getLat());
 
-        array_data = new ArrayList<>();
+        stationData = new ArrayList<>();
 
-        APIThread thread = new APIThread();
-        thread.start();
+        String[] arr = {
+                "http://openapi.gbis.go.kr/ws/rest/",
+                "busstationservice",
+                "searcharound",
+                "serviceKey=2LGrVBKRbUxVD5dXYkOPLb9Sar7XnzXiJ4REz2%2FS60MTHKOjsVBL7ZL6wKMrBomsdEVmDHmH9xW7J2hvtgllxA%3D%3D",
+                "&x=" + lt.getLong() + "&y=" + lt.getLat()
+        };
+        String[] tags = {
+                "regionName",
+                "stationId",
+                "stationName"
+        };
+        String endTag = "busStationAroundList";
 
         try {
-            thread.join();
-        } catch (InterruptedException e) {
-            Log.e("Thread", e.toString());
+            stationData = new GetApiData(arr, tags, endTag).execute().get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
         }
-        System.out.println(array_data.size());
-        mNearStationAdapter = new NearStationAdapter(LocationSearchActivity.this, array_data);
+        Log.i("API", "Array size: " + stationData.size());
+
+        mNearStationAdapter = new NearStationAdapter(LocationSearchActivity.this, stationData);
         mListView.setAdapter(mNearStationAdapter);
-    }
 
-    private class APIThread extends Thread {
-        public void run() {
-            Log.i("API", "X: " + lt.getLong() + ", Y: " + lt.getLat());
-            getApiData = new GetApiData("busstationservice", "searcharound", "&x=" + lt.getLong() + "&y=" + lt.getLat());
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.i("ListView", position + "번 선택");
 
-            boolean isRegionName = false, isStationId = false, isStationName = false;
-            String regionName = "", stationId = "", stationName = "";
+                Intent intent = new Intent(LocationSearchActivity.this, StationInfoActivity.class);
 
-            XmlPullParser parser = Xml.newPullParser();
-            try {
-                parser.setInput(getApiData.getData(), null);
-
-                int parserEvent = parser.getEventType();
-                while (parserEvent != XmlPullParser.END_DOCUMENT) {
-                    switch (parserEvent) {
-                        case XmlPullParser.START_TAG:
-                            String tagName = parser.getName();
-
-                            if (tagName.equals("regionName")) {
-                                isRegionName = true;
-                            }
-                            else if (tagName.equals("stationId")) {
-                                isStationId = true;
-                            }
-                            else if (tagName.equals("stationName")) {
-                                isStationName = true;
-                            }
-                            break;
-                        case XmlPullParser.TEXT:
-                            if (isRegionName) {
-                                regionName = parser.getText();
-                                isRegionName = false;
-                            }
-                            else if (isStationId) {
-                                stationId = parser.getText();
-                                isStationId = false;
-                            }
-                            else if (isStationName) {
-                                stationName = parser.getText();
-                                isStationName = false;
-                            }
-                            break;
-                        case XmlPullParser.END_TAG:
-                            if (parser.getName().equals("busStationAroundList")) {
-                                array_data.add(new String[] {
-                                   regionName, stationId, stationName
-                                });
-                            }
-                            break;
-                    }
-                    parserEvent = parser.next();
+                HashMap<String, String> data = stationData.get(position);
+                for (Map.Entry<String, String> e: data.entrySet()) {
+                    intent.putExtra(e.getKey(), e.getValue());
                 }
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                Log.e("Parsing", e.toString());
-            } catch (NullPointerException e) {
-                Log.e("API", e.toString());
+
+                startActivity(intent);
             }
-        }
+        });
     }
 }
 
 class NearStationAdapter extends BaseAdapter {
     private final Context mContext;
-    private final ArrayList<String []> array_data;
+    private final ArrayList<HashMap<String, String>> stationData;
 
     private ViewHolder mViewHolder;
 
-    public NearStationAdapter(Context mContext, ArrayList<String []> array_data) {
+    public NearStationAdapter(Context mContext, ArrayList<HashMap<String, String>> stationData) {
         this.mContext = mContext;
-        this.array_data = array_data;
+        this.stationData = stationData;
     }
 
     @Override
     public int getCount() {
-        return array_data.size();
+        return stationData.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return array_data.get(position);
+        return stationData.get(position);
     }
 
     @Override
@@ -151,9 +117,9 @@ class NearStationAdapter extends BaseAdapter {
             mViewHolder = (ViewHolder) convertView.getTag();
         }
 
-        String [] data = array_data.get(position);
-        mViewHolder.near_station_title.setText(data[2] + " (" + data[1] + ")");
-        mViewHolder.near_station_text.setText(data[0]);
+        HashMap<String, String> data = stationData.get(position);
+        mViewHolder.near_station_title.setText(data.get("stationName") + " (" + data.get("stationId") + ")");
+        mViewHolder.near_station_text.setText(data.get("regionName"));
 
         return convertView;
     }
