@@ -36,6 +36,7 @@ public class MainActivity2 extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
+                tabPosition = position;
 
                 Fragment selected = null;
                 if (position == 0) {
@@ -67,10 +68,11 @@ public class MainActivity2 extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragment1).commit(); // 탭 전환
                     fragment1.setArguments(bundle);
                 }
-                else
+                else {
                     fragment2 = new Fragment2();
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragment2).commit(); // 탭 전환
-                fragment2.setArguments(bundle);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragment2).commit(); // 탭 전환
+                    fragment2.setArguments(bundle);
+                }
                 return true;
             }
 
@@ -82,10 +84,11 @@ public class MainActivity2 extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragment1).commit(); // 탭 전환
                     fragment1.setArguments(bundle);
                 }
-                else
+                else {
                     fragment2 = new Fragment2();
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragment2).commit(); // 탭 전환
-                fragment2.setArguments(bundle);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragment2).commit(); // 탭 전환
+                    fragment2.setArguments(bundle);
+                }
                 return true;
             }
         });
