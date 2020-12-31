@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class RouteInfoActivity extends AppCompatActivity {
     private TextView routeName, routeTypeName, startStationName, endStationName;
@@ -33,11 +35,22 @@ public class RouteInfoActivity extends AppCompatActivity {
     private String tags[]; // 요청 태그
     private String endTag;
     private ArrayList<HashMap<String, String>> map = new ArrayList<>();
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_info);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                ApiParser();
+                TripListView();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
 
         // 표시할 정보 가져오기
         Intent intent = getIntent();
@@ -78,6 +91,22 @@ public class RouteInfoActivity extends AppCompatActivity {
 
         TripListView();
     }
+
+//    public void onRefresh() {
+//        mSwipeRefreshLayout.setRefreshing(true);
+//        //3초후에 해당 adapter를 갱신하고 동글뱅이를 닫아준다.setRefreshing(false);
+//        //핸들러를 사용하는 이유는 일반쓰레드는 메인쓰레드가 가진 UI에 접근할 수 없기 때문에 핸들러를 이용해서
+//        //메시지큐에 메시지를 전달하고 루퍼를 이용하여 순서대로 UI에 접근한다.
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                ApiParser();
+//                TripListView();
+//            }
+//        },3000);
+//        mSwipeRefreshLayout.setRefreshing(false);
+//
+//    }
 
     public void ApiParser() {
         map.clear();
