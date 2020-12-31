@@ -2,8 +2,10 @@ package com.example.businformapp.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +23,13 @@ import com.example.businformapp.RouteInfoActivity;
 import com.example.businformapp.StationInfoActivity;
 import com.example.businformapp.TypeAndRegionCode;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class HomeFragment extends Fragment {
@@ -39,9 +46,60 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+        fetchHistory();
         setListView(root);
 
         return root;
+    }
+
+    public void fetchHistory() {
+        JSONArray jArray = null;
+
+        SharedPreferences sharePref = requireActivity().getSharedPreferences("SHARE_PREF", Context.MODE_PRIVATE);
+        String shareRoute = sharePref.getString("Route", null);
+        String shareStation = sharePref.getString("Station", null);
+
+        try {
+            if (shareRoute != null) {
+                jArray = new JSONArray(shareRoute);
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject jObject = jArray.getJSONObject(i);
+                    Iterator<String> keys = jObject.keys();
+                    HashMap<String, String> temp = new HashMap<>();
+
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        String value = (String) jObject.get(key);
+
+                        temp.put(key, value);
+                    }
+
+                    arrayData.add(temp);
+                }
+            }
+            Log.i("JSON", "Array: " + arrayData.toString());
+
+            if (shareStation != null) {
+                jArray = new JSONArray(shareStation);
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject jObject = jArray.getJSONObject(i);
+                    Iterator<String> keys = jObject.keys();
+                    HashMap<String, String> temp = new HashMap<>();
+
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        String value = (String) jObject.get(key);
+
+                        temp.put(key, value);
+                    }
+
+                    arrayData2.add(temp);
+                }
+            }
+            Log.i("JSON", "Array: " + arrayData2.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setListView(View view) {

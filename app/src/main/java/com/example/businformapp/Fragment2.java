@@ -3,6 +3,7 @@ package com.example.businformapp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,6 +87,38 @@ public class Fragment2 extends Fragment {
                 Intent intent = new Intent(getActivity().getApplicationContext(), StationInfoActivity.class);
                 // 클릭 위치 탐색
                 HashMap<String, String> data = busStationList.get(position);
+
+                JsonDataManager jsonManager = new JsonDataManager(requireContext());
+                JSONArray jsArray = jsonManager.getData("Station");
+
+                if (jsArray != null) {
+                    Log.i("JSON", "Loaded: " + jsArray.toString());
+
+                    boolean hasName = false;
+                    for (int i = 0; i < jsArray.length(); i++) {
+                        try {
+                            JSONObject obj = jsArray.getJSONObject(i);
+                            if (obj.get("stationId").equals(data.get("stationId"))) {
+                                hasName = true;
+                                break;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (!hasName) {
+                        jsArray.put(new JSONObject(data));
+                        jsonManager.setData(jsArray, "Station");
+                    }
+                }
+                else {
+                    jsArray = new JSONArray();
+                    jsArray.put(new JSONObject(data));
+                    jsonManager.setData(jsArray, "Station");
+                }
+                Log.i("JSON", "Saved: " + data.toString());
+
                 // putExtra 첫 인자는 식별 태그, 두번째는 다음 엑티비티에 넘길 정보
                 intent.putExtra("stationId", data.get("stationId"));
                 intent.putExtra("stationName", data.get("stationName"));
