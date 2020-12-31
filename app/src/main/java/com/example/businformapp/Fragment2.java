@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,25 +23,33 @@ import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
 public class Fragment2 extends Fragment {
-
+    private SearchView mSearchView;
+    private ListView mListView;
     private ArrayList<HashMap<String, String>> busStationList;
-
+    private String params = "&keyword=";
+    private Bundle bundle = new Bundle();
     @Override
     public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
 
     @Nullable
     @Override // MainActivity에서의 onCreate 메소드는 Fragment에서는 onCreateView 메소드에 작성합니다.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Fragment에서는 MainActivity에서의 setContentView(R.layout.xml파일명) 대신 inflater가 존재합니다.
-        // inflater는 xml로 정의된 view (또는 menu 등)를 실제 객체화 시키는 용도
-        // 또한 setContentView의 부재로 findViewById(R.id.id명)은 바로 사용할 수 없고 앞에 getView 를 붙여주거나 inflater된 View의 변수명을 붙여주도록 합니다.
-        // findViewById 은 xml 레이아웃에 정의되어있는 뷰를 가져오는 메소드 (참조 : https://yongku.tistory.com/entry/안드로이드-스튜디오Android-Studio-findViewById )
+        try {
+            bundle = getArguments();
+            String arg = bundle.getString("query");
+            System.out.println("———————— >> " + arg);
+            params  += arg;
+        }
+        catch (NullPointerException e) {
+            System.out.println("정보 없음");
+        }
+
         String[] arr = {
                 "http://openapi.gbis.go.kr/ws/rest/",
                 "busstationservice",
                 "",
                 "serviceKey=2LGrVBKRbUxVD5dXYkOPLb9Sar7XnzXiJ4REz2%2FS60MTHKOjsVBL7ZL6wKMrBomsdEVmDHmH9xW7J2hvtgllxA%3D%3D",
-                "&keyword=12"
+                params
         };
         String[] tags = {
                 "stationId",
