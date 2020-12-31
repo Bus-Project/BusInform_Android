@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -27,8 +30,7 @@ public class Fragment1 extends Fragment {
     private SearchView mSearchView;
     private ListView mListView;
     private RouteNameAdapter routeNameAdapter;
-
-    private EditText edit;
+    Bundle bundle;
 
     private String searvicePath = "http://openapi.gbis.go.kr/ws/rest/";
     private String serviceName = "busrouteservice";
@@ -36,8 +38,8 @@ public class Fragment1 extends Fragment {
     private String serviceKey = "serviceKey=2LGrVBKRbUxVD5dXYkOPLb9Sar7XnzXiJ4REz2%2FS60MTHKOjsVBL7ZL6wKMrBomsdEVmDHmH9xW7J2hvtgllxA%3D%3D";
     private String areaId = "";
     private String params = "&keyword=";
-    //    private String arr[];
-//    private String tags[];
+    private String arr[];
+    private String tags[];
     String endTag = "";
 
     ArrayList<HashMap<String, String>> mapArrayList = new ArrayList<>();
@@ -51,20 +53,20 @@ public class Fragment1 extends Fragment {
     @Override // MainActivity에서의 onCreate 메소드는 Fragment에서는 onCreateView 메소드에 작성합니다.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Fragment에서는 MainActivity에서의 setContentView(R.layout.xml파일명) 대신 inflater가 존재합니다.
-        // inflater는 xml로 정의된 view (또는 menu 등)를 실제 객체화 시키는 용도
+        // inflater는 xml로 정의된 view (또는 menu_search 등)를 실제 객체화 시키는 용도
         // 또한 setContentView의 부재로 findViewById(R.id.id명)은 바로 사용할 수 없고 앞에 getView 를 붙여주거나 inflater된 View의 변수명을 붙여주도록 합니다.
         // findViewById 은 xml 레이아웃에 정의되어있는 뷰를 가져오는 메소드 (참조 : https://yongku.tistory.com/entry/안드로이드-스튜디오Android-Studio-findViewById )
 
-//        params += "11";
-//        arr = new String[]{searvicePath, serviceName, operation, serviceKey, params};
-        String[] arr = {
-                "http://openapi.gbis.go.kr/ws/rest/",
-                "busrouteservice",
-                "",
-                "serviceKey=2LGrVBKRbUxVD5dXYkOPLb9Sar7XnzXiJ4REz2%2FS60MTHKOjsVBL7ZL6wKMrBomsdEVmDHmH9xW7J2hvtgllxA%3D%3D",
-                "&keyword=12"
-        };
-        String tags[] = {"routeId", "routeName", "routeTypeName", "districtCd"}; // 요청 태그
+        try {
+            bundle = getArguments();
+            String arg = bundle.getString("query");
+            params += arg;
+        }
+        catch (NullPointerException e) {
+            System.out.println("정보 없음");
+        }
+        arr = new String[]{searvicePath, serviceName, operation, serviceKey, params};
+        tags = new String[]{"routeId", "routeName", "routeTypeCd", "routeTypeName", "districtCd", "regionName"}; // 요청 태그
         endTag = "busRouteList";
 
         try {
@@ -75,10 +77,10 @@ public class Fragment1 extends Fragment {
 
 
         View view = inflater.inflate(R.layout.fragment1, null);
-
         setListView(view);
         return view;
     }
+
     public void setListView(View view) {
         // Fragment에서는 .this 대신 getActivity().getApplicationContext() 을 사용합니다.
         RouteNameAdapter adapter = new RouteNameAdapter(getActivity().getApplicationContext(), mapArrayList);
@@ -103,67 +105,79 @@ public class Fragment1 extends Fragment {
             }
         });
     }
-}
 
-class RouteNameAdapter extends BaseAdapter {
-    private Context applicationContext;
-    private ArrayList<HashMap<String, String>> array_data;
-
-    private ViewHolder mViewHolder;
-
-    public RouteNameAdapter(Context applicationContext, ArrayList<HashMap<String, String>> mapArrayList) {
-        this.applicationContext = applicationContext;
-        this.array_data = mapArrayList;
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
-    public int getCount() {
-        return array_data.size();
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public Object getItem(int position) {
-        return array_data.get(position);
-    }
+    class RouteNameAdapter extends BaseAdapter {
+        private Context applicationContext;
+        private ArrayList<HashMap<String, String>> array_data;
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
+        private ViewHolder mViewHolder;
 
-    @RequiresApi(api = Build.VERSION_CODES.R)
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(applicationContext).inflate(R.layout.route_name_list_item, parent, false); // 리스트 뷰에 들어갈 아이템.xml 파일
-            mViewHolder = new ViewHolder(convertView);
-            convertView.setTag(mViewHolder);
-        }
-        else {
-            mViewHolder = (ViewHolder) convertView.getTag();
+        public RouteNameAdapter(Context applicationContext, ArrayList<HashMap<String, String>> mapArrayList) {
+            this.applicationContext = applicationContext;
+            this.array_data = mapArrayList;
         }
 
-        HashMap<String, String> data = array_data.get(position);
-        mViewHolder.route_name_title.setText(data.get("routeName")); // 받아올 정보
-        String idCode = data.get("routeTypeCd");
-        String regionCode = data.get("districtCd");
-        // 임시
-//        TypeAndRegionCode typeAndRegionCode = new TypeAndRegionCode(idCode, regionCode);
-//        regionCode = typeAndRegionCode.getRegionName();
-//        idCode = typeAndRegionCode.getRouteType();
-//        mViewHolder.route_name_text.setText(regionCode + " " + idCode);
-        mViewHolder.route_name_text.setText(data.get("routeName"));
+        @Override
+        public int getCount() {
+            return array_data.size();
+        }
 
-        return convertView;
-    }
+        @Override
+        public Object getItem(int position) {
+            return array_data.get(position);
+        }
 
-    private class ViewHolder {
-        private TextView route_name_title; // xml의 title id
-        private TextView route_name_text; // // xml의 text id
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
 
-        public ViewHolder(View convertView) {
-            route_name_title = (TextView) convertView.findViewById(R.id.route_name_title);
-            route_name_text = (TextView) convertView.findViewById(R.id.route_name_text);
+        @RequiresApi(api = Build.VERSION_CODES.R)
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(applicationContext).inflate(R.layout.route_name_list_item, parent, false); // 리스트 뷰에 들어갈 아이템.xml 파일
+                mViewHolder = new ViewHolder(convertView);
+                convertView.setTag(mViewHolder);
+            } else {
+                mViewHolder = (ViewHolder) convertView.getTag();
+            }
+
+            HashMap<String, String> data = array_data.get(position);
+            System.out.println("------------------------------> "+data);
+            mViewHolder.route_name_title.setText(data.get("routeName")); // 받아올 정보
+
+            String idCode = data.get("routeTypeCd");
+            String regionCode = data.get("districtCd");
+            String regionName = data.get("regionName");
+
+            TypeAndRegionCode typeAndRegionCode = new TypeAndRegionCode(idCode, regionCode);
+            regionCode = typeAndRegionCode.getRegionName();
+            idCode = typeAndRegionCode.getRouteType();
+
+            mViewHolder.route_name_text.setText(regionName + "시" + " " + idCode);
+
+            return convertView;
+        }
+
+        private class ViewHolder {
+            private TextView route_name_title; // xml의 title id
+            private TextView route_name_text; // // xml의 text id
+
+            public ViewHolder(View convertView) {
+                route_name_title = (TextView) convertView.findViewById(R.id.route_name_title);
+                route_name_text = (TextView) convertView.findViewById(R.id.route_name_text);
+            }
         }
     }
 }
