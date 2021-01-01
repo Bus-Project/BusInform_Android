@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class HomeFragment extends Fragment {
+    private View root;
 
     private ArrayList<HashMap<String, String>> arrayData = new ArrayList<>();
     private ArrayList<HashMap<String, String>> arrayData2 = new ArrayList<>();
@@ -47,15 +48,25 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        fetchHistory();
-        setListView(root);
+        root = inflater.inflate(R.layout.fragment_home, container, false);
 
         return root;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("MainActivity", "Resume MainActivity.");
+
+        fetchHistory();
+        setListView(root);
+    }
+
     public void fetchHistory() {
         JSONArray jArray = null;
+
+        arrayData.clear();
+        arrayData2.clear();
 
         SharedPreferences sharePref = requireActivity().getSharedPreferences("SHARE_PREF", Context.MODE_PRIVATE);
         String shareRoute = sharePref.getString("Route", null);
