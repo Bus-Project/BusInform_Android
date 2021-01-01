@@ -3,6 +3,7 @@ package com.example.businformapp;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -40,9 +42,21 @@ public class BusArrivalInfoActivity extends AppCompatActivity{
     private String staOrder;
     private String newServiceKey;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_busarrival_info);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipeRefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                ApiParser();
+                BusInformView();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
 
         Intent intent = getIntent();
 
@@ -71,7 +85,22 @@ public class BusArrivalInfoActivity extends AppCompatActivity{
         endTag = "busArrivalItem";
 
         ApiParser();
+        BusInformView();
 
+
+    }
+
+    public void ApiParser() {
+        map.clear();
+        try {
+            map = new GetApiData(arr, tags, endTag).execute().get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(map);
+    }
+
+    public void BusInformView() {
         try {
             HashMap<String, String> data = map.get(0);
             //정보 화면에 출력
@@ -88,18 +117,6 @@ public class BusArrivalInfoActivity extends AppCompatActivity{
             predictTime1.setText("");
             predictTime2.setText("");
         }
-
-
-    }
-
-    public void ApiParser() {
-        map.clear();
-        try {
-            map = new GetApiData(arr, tags, endTag).execute().get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println(map);
     }
 
 }
