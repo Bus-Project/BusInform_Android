@@ -1,107 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-    android:id="@+id/swipeRefresh"
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:layout_height="match_parent">
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="95px"
-            android:orientation="horizontal"
-            android:background="#F08080">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="95px"
+                android:orientation="horizontal"
+                android:background="#F08080">
+
+                <TextView
+                    android:id="@+id/routeName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="첫번째 도착 버스>>"
+                    android:textSize="20dp"
+                    android:textColor="#FFFFFF"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="150px"
+                android:orientation="vertical"
+                android:background="#FAE0D4">
+
+                <TextView
+                    android:id="@+id/locationNo1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="첫번째 버스"
+                    android:textSize="18dp"
+                    android:textColor="#191919"/>
+                <TextView
+                    android:id="@+id/predictTime1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="첫번째 버스 도착 예상 시간"
+                    android:textSize="18dp"
+                    android:textColor="#191919"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="95px"
+                android:orientation="horizontal"
+                android:background="#F08080">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="두번째 도착 버스>>"
+                    android:textSize="20dp"
+                    android:textColor="#FFFFFF"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="150px"
+                android:orientation="vertical"
+                android:background="#FAE0D4">
+
+                <TextView
+                    android:id="@+id/locationNo2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="두번째 버스"
+                    android:textSize="18dp"
+                    android:textColor="#191919"/>
+
+                <TextView
+                    android:id="@+id/predictTime2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="두번째 버스 도착 예상 시간"
+                    android:textSize="18dp"
+                    android:textColor="#191919"/>
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/routeName"
+                android:id="@+id/trip_route"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="첫번째 도착 버스>>"
-                android:textSize="20dp"
-                android:textColor="#FFFFFF"/>
+                android:layout_gravity="center"
+                android:text="[경유 정류장 목록]"
+                android:textSize="20dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/fab_margin"
+                    android:layout_gravity="bottom|end"
+                    app:srcCompat="@android:drawable/ic_popup_sync" />
+
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/swipeRefresh"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ListView
+                        android:id="@+id/routeStationListView2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"></ListView>
+
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+            </RelativeLayout>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="150px"
-            android:orientation="vertical"
-            android:background="#FAE0D4">
 
-            <TextView
-                android:id="@+id/locationNo1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:text="첫번째 버스"
-                android:textSize="18dp"
-                android:textColor="#191919"/>
-            <TextView
-                android:id="@+id/predictTime1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:text="첫번째 버스 도착 예상 시간"
-                android:textSize="18dp"
-                android:textColor="#191919"/>
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="95px"
-            android:orientation="horizontal"
-            android:background="#F08080">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:text="두번째 도착 버스>>"
-                android:textSize="20dp"
-                android:textColor="#FFFFFF"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="150px"
-            android:orientation="vertical"
-            android:background="#FAE0D4">
-
-            <TextView
-                android:id="@+id/locationNo2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="두번째 버스"
-                android:textSize="18dp"
-                android:textColor="#191919"/>
-
-            <TextView
-                android:id="@+id/predictTime2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:text="두번째 버스 도착 예상 시간"
-                android:textSize="18dp"
-                android:textColor="#191919"/>
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/trip_route"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="버스 도착 정보"
-            android:textSize="20dp"/>
-
-    </LinearLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
