@@ -14,6 +14,10 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +74,38 @@ public class LocationSearchActivity extends AppCompatActivity {
                 Intent intent = new Intent(LocationSearchActivity.this, StationInfoActivity.class);
 
                 HashMap<String, String> data = stationData.get(position);
+
+                JsonDataManager jsonManager = new JsonDataManager(LocationSearchActivity.this);
+                JSONArray jsArray = jsonManager.getData("Station");
+
+                if (jsArray != null) {
+                    Log.i("JSON", "Loaded: " + jsArray.toString());
+
+                    boolean hasName = false;
+                    for (int i = 0; i < jsArray.length(); i++) {
+                        try {
+                            JSONObject obj = jsArray.getJSONObject(i);
+                            if (obj.get("stationId").equals(data.get("stationId"))) {
+                                hasName = true;
+                                break;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (!hasName) {
+                        jsArray.put(new JSONObject(data));
+                        jsonManager.setData(jsArray, "Station");
+                    }
+                }
+                else {
+                    jsArray = new JSONArray();
+                    jsArray.put(new JSONObject(data));
+                    jsonManager.setData(jsArray, "Station");
+                }
+                Log.i("JSON", "Saved: " + data.toString());
+
                 for (Map.Entry<String, String> e: data.entrySet()) {
                     intent.putExtra(e.getKey(), e.getValue());
                 }

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -18,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import com.example.businformapp.JsonDataManager;
 import com.example.businformapp.R;
 import com.example.businformapp.RouteInfoActivity;
 import com.example.businformapp.StationInfoActivity;
@@ -33,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class HomeFragment extends Fragment {
+    private View root;
 
     private ArrayList<HashMap<String, String>> arrayData = new ArrayList<>();
     private ArrayList<HashMap<String, String>> arrayData2 = new ArrayList<>();
@@ -45,15 +48,25 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        fetchHistory();
-        setListView(root);
+        root = inflater.inflate(R.layout.fragment_home, container, false);
 
         return root;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("MainActivity", "Resume MainActivity.");
+
+        fetchHistory();
+        setListView(root);
+    }
+
     public void fetchHistory() {
         JSONArray jArray = null;
+
+        arrayData.clear();
+        arrayData2.clear();
 
         SharedPreferences sharePref = requireActivity().getSharedPreferences("SHARE_PREF", Context.MODE_PRIVATE);
         String shareRoute = sharePref.getString("Route", null);
@@ -191,10 +204,36 @@ class HomeAdapter extends BaseAdapter {
             idCode = typeAndRegionCode.getRouteType();
 
             mViewHolder.home_frag_text.setText(regionCode + " " + idCode);
-        } else {
+
+            mViewHolder.home_frag_imgBtn.setTag("0:" + position);
+        }
+        else {
             mViewHolder.home_frag_title.setText(data.get("stationName"));
             mViewHolder.home_frag_text.setText(data.get("regionName"));
+
+            mViewHolder.home_frag_imgBtn.setTag("1:" + position);
         }
+
+        mViewHolder.home_frag_imgBtn.setOnClickListener(new ImageButton.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String tag = (String) v.getTag();
+                Log.i("Button", "ImgBtn Selected: " + tag);
+
+                String [] tags = tag.split(":");
+
+                int mode = Integer.parseInt(tags[0]);
+                int index = Integer.parseInt(tags[1]);
+
+                arrayData.remove(index);
+                notifyDataSetChanged();
+
+                JsonDataManager jsonManager = new JsonDataManager(mContext);
+                JSONArray jsArray = new JSONArray(arrayData);
+                jsonManager.setData(jsArray, (mode == 0) ? "Route" : "Station");
+                Log.i("JSON", "Deleted & Saved: " + jsArray.toString());
+            }
+        });
 
         return convertView;
     }
@@ -202,10 +241,12 @@ class HomeAdapter extends BaseAdapter {
     private class ViewHolder {
         private TextView home_frag_title;
         private TextView home_frag_text;
+        private ImageButton home_frag_imgBtn;
 
         public ViewHolder(View convertView) {
             home_frag_title = convertView.findViewById(R.id.home_frag_title);
             home_frag_text = convertView.findViewById(R.id.home_frag_text);
+            home_frag_imgBtn = convertView.findViewById(R.id.home_frag_imgBtn);
         }
     }
 }

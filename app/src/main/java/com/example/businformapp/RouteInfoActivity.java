@@ -6,19 +6,27 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Vector;
 import java.util.concurrent.ExecutionException;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 public class RouteInfoActivity extends AppCompatActivity {
     private TextView routeName, routeTypeName, startStationName, endStationName;
@@ -32,12 +40,33 @@ public class RouteInfoActivity extends AppCompatActivity {
     private String arr[];
     private String tags[]; // 요청 태그
     private String endTag;
-    private ArrayList<HashMap<String, String>> map = new ArrayList<>();
+    private ArrayList<HashMap<String, String>>  map = new ArrayList<>();
+    private ArrayList<ArrayList<HashMap<String, String>>> maps = new ArrayList<>();
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_info);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                ApiParser();
+                TripListView();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        FloatingActionButton fab = findViewById(R.id.locationRefresh);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ApiParser();
+                TripListView();
+            }
+        });
 
         // 표시할 정보 가져오기
         Intent intent = getIntent();
@@ -74,23 +103,32 @@ public class RouteInfoActivity extends AppCompatActivity {
         arr = new String[]{searvicePath, serviceName, operation, serviceKey, params};
         tags = new String[]{"stationId", "staOrder", "stationName", "mobileNo"};
         endTag = "busRouteStationList";
+        maps.clear();
+        ApiParser();
+
+        // 노선 위치 조회 (하단)
+        operation = "";
+        serviceName = "buslocationservice";
+        serviceKey = "serviceKey=69LFDh7FMch46%2FjRKfryua60biumVeNfOOox2jZadZGZSEPIplk5OLP8qPi0eHvWL5RGjDoiUkwvj96w58mYzw%3D%3D";
+        arr = new String[]{searvicePath, serviceName, operation, serviceKey, params};
+        tags = new String[]{"routeId", "stationId", "stationSeq"};
+        endTag = "busLocationList";
         ApiParser();
 
         TripListView();
     }
 
     public void ApiParser() {
-        map.clear();
         try {
             map = new GetApiData(arr, tags, endTag).execute().get();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println(map);
+        maps.add(map);
     }
 
     public void TripListView() {
-        RouteStationListAdapter adapter = new RouteStationListAdapter(RouteInfoActivity.this, map);
+        RouteStationListAdapter adapter = new RouteStationListAdapter(RouteInfoActivity.this, maps);
 
         ListView listView = (ListView)findViewById(R.id.routeStationListView);
         listView.setAdapter(adapter);
@@ -106,32 +144,46 @@ public class RouteInfoActivity extends AppCompatActivity {
 
     class RouteStationListAdapter extends BaseAdapter {
         private Context mContext;
-        private ArrayList<HashMap<String, String>> array_data;
+        private ArrayList<ArrayList<HashMap<String, String>>> array_data;
+        private ArrayList<HashMap<String, String>> arr1;
+        private ArrayList<HashMap<String, String>> arr2;
+        private Vector<String> stationSeqVector = new Vector<>();
+        private HashMap<String, String> locationData;
+        private long getPositon = 0;
 
         private ViewHolder mViewHolder;
 
-        public RouteStationListAdapter(Context mContext, ArrayList<HashMap<String, String>> mapArrayList) {
+        public RouteStationListAdapter(Context mContext, ArrayList<ArrayList<HashMap<String, String>>> mapArrayList) {
             this.mContext = mContext;
             this.array_data = mapArrayList;
+            this.arr1 = array_data.get(0);
+            this.arr2 = array_data.get(1);
+
+            for (int i = 0; i < arr2.size(); i++) {
+                locationData = arr2.get(i);
+                String stationSeq = locationData.get("stationSeq");
+                stationSeqVector.add(stationSeq);
+            }
         }
 
         @Override
         public int getCount() {
-            return array_data.size();
+            return arr1.size();
         }
 
         @Override
-        public Object getItem(int position) {
-            return array_data.get(position);
+        public Object getItem(int position) { // 어댑터가 관리하는 Data의 Item의 Positon을 반환
+            return arr1.get(position);
         }
 
         @Override
-        public long getItemId(int position) {
+        public long getItemId(int position) { // 어댑터가 관리하는 Data의 Item의 Positon의 ID를 반환
             return position;
         }
 
         @RequiresApi(api = Build.VERSION_CODES.R)
         @Override
+        // position은 아이템의 인덱스, convertView는 인덱스에 해당하는 뷰 객체, ViewGroup은 convertView를 포함하는 부모 컨테이너 객체
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(mContext).inflate(R.layout.station_name_list_item, parent, false); // 리스트 뷰에 들어갈 아이템.xml 파일
@@ -141,12 +193,20 @@ public class RouteInfoActivity extends AppCompatActivity {
                 mViewHolder = (ViewHolder) convertView.getTag();
             }
 
-            HashMap<String, String> data = array_data.get(position);
-            System.out.println("------------------------------> "+data);
-            System.out.println("------------------------------> " + data.get("stationName"));
-            System.out.println("------------------------------> " + data.get("mobileNo"));
-            mViewHolder.station_name_title.setText(data.get("stationName")); // 받아올 정보
-            mViewHolder.station_name_text.setText(data.get("mobileNo"));
+            HashMap<String, String> stationData = arr1.get(position);
+
+            getPositon = getItemId(position); // 아이템 인덱스
+            String strPosition = String.valueOf(getPositon);
+
+            mViewHolder.route_image.setImageResource(R.drawable.route_null);
+
+            for (int i = 0; i < stationSeqVector.size(); i++) { // 정류소 순번과 인덱스 대조
+                String stationSeq = stationSeqVector.get(i);
+                if (stationSeq.equals(strPosition))
+                    mViewHolder.route_image.setImageResource(R.drawable.route_pass);
+            }
+            mViewHolder.station_name_title.setText(stationData.get("stationName"));
+            mViewHolder.station_name_text.setText(stationData.get("mobileNo"));
 
             return convertView;
         }
@@ -154,10 +214,12 @@ public class RouteInfoActivity extends AppCompatActivity {
         private class ViewHolder {
             private TextView station_name_title; // xml의 title id
             private TextView station_name_text; // // xml의 text id
+            private ImageView route_image;
 
             public ViewHolder(View convertView) {
                 station_name_title = (TextView) convertView.findViewById(R.id.station_name_title);
                 station_name_text = (TextView) convertView.findViewById(R.id.station_name_text);
+                route_image = (ImageView) convertView.findViewById(R.id.route_image);
             }
         }
     }
