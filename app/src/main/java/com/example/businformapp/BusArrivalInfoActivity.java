@@ -283,12 +283,12 @@ public class BusArrivalInfoActivity extends AppCompatActivity{
             getPositon = getItemId(position); // 아이템 인덱스
             String strPosition = String.valueOf(getPositon);
 
-            mViewHolder.route_image.setImageResource(R.drawable.route_null);
+            mViewHolder.route_image.setImageResource(R.drawable.ic_route_null);
 
             for (int i = 0; i < stationSeqVector.size(); i++) { // 정류소 순번과 인덱스 대조
                 String stationSeq = stationSeqVector.get(i);
                 if (stationSeq.equals(strPosition))
-                    mViewHolder.route_image.setImageResource(R.drawable.route_pass);
+                    mViewHolder.route_image.setImageResource(R.drawable.ic_route_pass);
             }
             mViewHolder.station_name_title.setText(stationData.get("stationName"));
             mViewHolder.station_name_text.setText(stationData.get("mobileNo"));
