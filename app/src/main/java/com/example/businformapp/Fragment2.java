@@ -59,7 +59,9 @@ public class Fragment2 extends Fragment {
         String[] tags = {
                 "stationId",
                 "stationName",
-                "regionName"
+                "regionName",
+                "x",
+                "y"
         };
         String endTag = "busStationList";
 
@@ -123,6 +125,8 @@ public class Fragment2 extends Fragment {
                 intent.putExtra("stationId", data.get("stationId"));
                 intent.putExtra("stationName", data.get("stationName"));
                 intent.putExtra("regionName", data.get("regionName"));
+                intent.putExtra("x", data.get("x"));
+                intent.putExtra("y", data.get("y"));
                 startActivity(intent);
             }
         });
