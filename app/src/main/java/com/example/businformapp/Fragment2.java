@@ -157,7 +157,7 @@ class StationNameAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(applicationContext).inflate(R.layout.station_name_list_item, parent, false);
+            convertView = LayoutInflater.from(applicationContext).inflate(R.layout.station_name_list_item2, parent, false);
             mViewHolder = new ViewHolder(convertView);
             convertView.setTag(mViewHolder);
         }
