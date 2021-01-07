@@ -8,11 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -42,6 +44,10 @@ public class StationInfoActivity extends AppCompatActivity {
 
     String routeId;
 
+    private String x;
+    private String y;
+    private String markerName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +71,22 @@ public class StationInfoActivity extends AppCompatActivity {
 
         BusNumberListView();
 
+        x = intent.getStringExtra("x");
+        y = intent.getStringExtra("y");
+        markerName = title;
+        Button mapStationBtn = findViewById(R.id.mapStationBtn);
+        mapStationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("Kakao Map", "Map View Activity start.");
+
+                Intent intent = new Intent(StationInfoActivity.this, MapViewActivity.class);
+                intent.putExtra("x", x);
+                intent.putExtra("y", y);
+                intent.putExtra("markerName", markerName);
+                startActivity(intent);
+            }
+        });
     }
     public void ApiParser() {
         map.clear();

@@ -5,6 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_margin="5dp">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/button_layout"
+            android:id="@+id/mapStationBtn"
+            android:textColor="#6200EE"
+            android:textStyle="bold"
+            android:text="지도보기"/>
+
+    </LinearLayout>
+
     <ListView
         android:id="@+id/busNumberListView"
         android:layout_width="match_parent"
